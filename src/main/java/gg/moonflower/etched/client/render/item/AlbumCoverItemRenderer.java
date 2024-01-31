@@ -10,9 +10,9 @@ import gg.moonflower.etched.common.item.AlbumCoverItem;
 import gg.moonflower.etched.core.Etched;
 import gg.moonflower.etched.core.mixin.client.SpriteContentsAccessor;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -50,7 +50,7 @@ import java.util.concurrent.Executor;
 /**
  * @author Ocelot
  */
-public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer implements IdentifiableResourceReloadListener {
+public class AlbumCoverItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer, IdentifiableResourceReloadListener {
 
     public static final AlbumCoverItemRenderer INSTANCE = new AlbumCoverItemRenderer();
     public static final String FOLDER_NAME = Etched.MOD_ID + "_album_cover";
@@ -70,7 +70,6 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
     }
 
     private AlbumCoverItemRenderer() {
-        super(null, null);
         this.covers = new HashMap<>();
         this.data = null;
     }
@@ -151,7 +150,7 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    public void render(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         if (stack.isEmpty()) {
             return;
         }

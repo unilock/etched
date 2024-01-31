@@ -39,18 +39,6 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
         super(properties);
     }
 
-    /* TODO
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(new IClientItemExtensions() {
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return AlbumCoverItemRenderer.INSTANCE;
-            }
-        });
-    }
-     */
-
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
@@ -226,13 +214,6 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
     public int getTrackCount(ItemStack stack) {
         return getRecords(stack).stream().filter(record -> record.getItem() instanceof PlayableRecord).mapToInt(record -> ((PlayableRecord) record.getItem()).getTrackCount(record)).sum();
     }
-
-    /* TODO
-    @Override
-    public boolean canGrindstoneRepair(ItemStack stack) {
-        return getCoverStack(stack).isPresent();
-    }
-     */
 
     public static Optional<ItemStack> getCoverStack(ItemStack stack) {
         if (stack.getItem() != EtchedItems.ALBUM_COVER) {
