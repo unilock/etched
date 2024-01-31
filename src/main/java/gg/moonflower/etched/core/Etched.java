@@ -48,7 +48,7 @@ public class Etched implements ModInitializer {
         EtchedSounds.init();
         EtchedRecipes.init();
 
-        //EtchedVillagers.init();
+        EtchedVillagers.init();
 
         ForgeConfigRegistry.INSTANCE.register(Etched.MOD_ID, ModConfig.Type.CLIENT, clientSpec);
         ForgeConfigRegistry.INSTANCE.register(Etched.MOD_ID, ModConfig.Type.SERVER, serverSpec);

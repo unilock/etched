@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
+import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -27,7 +28,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
@@ -35,19 +35,15 @@ import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class EtchedVillagers {
 
-    public static final PoiType BARD_POI = Registry.register(BuiltInRegistries.POINT_OF_INTEREST_TYPE, new ResourceLocation(Etched.MOD_ID, "bard"), new PoiType(ImmutableSet.<BlockState>builder().addAll(Blocks.NOTE_BLOCK.getStateDefinition().getPossibleStates()).build(), 1, 1));
-    private static final ResourceKey<PoiType> BARD_POI_TYPE = ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, new ResourceLocation(Etched.MOD_ID, "bard"));
-    public static final VillagerProfession BARD = Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, new ResourceLocation(Etched.MOD_ID, "bard"), new VillagerProfession(Etched.MOD_ID + ":bard", poi -> poi.is(BARD_POI_TYPE), poi -> poi.is(BARD_POI_TYPE), ImmutableSet.of(), ImmutableSet.of(), null));
+    private static final ResourceLocation BARD = new ResourceLocation(Etched.MOD_ID, "bard");
+    public static final PoiType BARD_POI = PointOfInterestHelper.register(BARD, 1, 1, Blocks.NOTE_BLOCK);
+    public static final VillagerProfession BARD_PROFESSION = Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, BARD, new VillagerProfession(Etched.MOD_ID + ":bard", poi -> poi.is(BARD), poi -> poi.is(BARD), ImmutableSet.of(), ImmutableSet.of(), null));
 
     public static void init() {
         registerTradesEvent();
@@ -55,18 +51,15 @@ public class EtchedVillagers {
     }
 
     public static void registerTradesEvent() {
-        final Int2ObjectMap<VillagerTrades.ItemListing[]> trades = VillagerTrades.TRADES.get(EtchedVillagers.BARD);
-
         Int2ObjectMap<TradeRegistry> newTrades = new Int2ObjectOpenHashMap<>();
-        int minTier = trades.keySet().intStream().min().orElse(1);
-        int maxTier = trades.keySet().intStream().max().orElse(5);
+        int minTier = 1;
+        int maxTier = 5;
         registerTrades(tier -> {
             Validate.inclusiveBetween(minTier, maxTier, tier, "Tier must be between " + minTier + " and " + maxTier);
             return newTrades.computeIfAbsent(tier, key -> new TradeRegistry());
         });
 
-        // TODO: ?
-        newTrades.forEach((tier, registry) -> TradeOfferHelper.registerVillagerOffers(EtchedVillagers.BARD, tier, list -> list.addAll(List.of(trades.get(tier.intValue())))));
+        newTrades.forEach((tier, registry) -> TradeOfferHelper.registerVillagerOffers(EtchedVillagers.BARD_PROFESSION, tier, factories -> factories.addAll(registry.trades)));
     }
 
     private static void registerTrades(Function<Integer, TradeRegistry> context) {
