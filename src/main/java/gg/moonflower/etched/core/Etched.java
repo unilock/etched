@@ -13,6 +13,10 @@ import gg.moonflower.etched.core.registry.EtchedRecipes;
 import gg.moonflower.etched.core.registry.EtchedSounds;
 import gg.moonflower.etched.core.registry.EtchedVillagers;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
@@ -56,41 +60,20 @@ public class Etched implements ModInitializer {
 
         SoundSourceManager.registerSource(new SoundCloudSource());
         SoundSourceManager.registerSource(new BandcampSource());
-    }
 
-    /* TODO
-    private static void onGrindstoneChange(GrindstoneEvent.OnPlaceItem event) {
-        ItemStack top = event.getTopItem();
-        ItemStack bottom = event.getBottomItem();
+        ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register((originalEntity, newEntity, origin, destination) -> {
+            if (newEntity instanceof ItemEntity entity) {
+                if (destination.dimension() == Level.NETHER) {
+                    ItemStack oldStack = entity.getItem();
+                    if (oldStack.getItem() != EtchedBlocks.RADIO.asItem()) {
+                        return;
+                    }
 
-        if (top.isEmpty() == bottom.isEmpty()) {
-            return;
-        }
-
-        ItemStack stack = top.isEmpty() ? bottom : top;
-        if (AlbumCoverItem.getCoverStack(stack).isPresent()) {
-            ItemStack result = stack.copy();
-            result.setCount(1);
-            AlbumCoverItem.setCover(result, ItemStack.EMPTY);
-            event.setOutput(result);
-        }
-    }
-     */
-
-    /* TODO
-    private static void onItemChangedDimension(EntityTravelToDimensionEvent event) {
-        if (event.getEntity() instanceof ItemEntity entity) {
-            if (event.getDimension() == Level.NETHER) {
-                ItemStack oldStack = entity.getItem();
-                if (oldStack.getItem() != EtchedBlocks.RADIO.get().asItem()) {
-                    return;
+                    ItemStack newStack = new ItemStack(EtchedBlocks.PORTAL_RADIO_ITEM, oldStack.getCount());
+                    newStack.setTag(oldStack.getTag());
+                    entity.setItem(newStack);
                 }
-
-                ItemStack newStack = new ItemStack(EtchedBlocks.PORTAL_RADIO_ITEM.get(), oldStack.getCount());
-                newStack.setTag(oldStack.getTag());
-                entity.setItem(newStack);
             }
-        }
+        });
     }
-     */
 }
