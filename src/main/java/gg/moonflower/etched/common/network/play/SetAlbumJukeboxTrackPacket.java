@@ -1,9 +1,9 @@
 package gg.moonflower.etched.common.network.play;
 
-import gg.moonflower.etched.common.network.play.handler.EtchedClientPlayPacketHandler;
-import gg.moonflower.etched.common.network.play.handler.EtchedServerPlayPacketHandler;
+import gg.moonflower.etched.common.network.EtchedMessages;
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -12,23 +12,20 @@ import org.jetbrains.annotations.ApiStatus;
  * @author Ocelot
  */
 @ApiStatus.Internal
-public record SetAlbumJukeboxTrackPacket(int playingIndex, int track) implements EtchedPacket {
+public record SetAlbumJukeboxTrackPacket(int playingIndex, int track) implements FabricPacket {
 
     public SetAlbumJukeboxTrackPacket(FriendlyByteBuf buf) {
         this(buf.readVarInt(), buf.readVarInt());
     }
 
     @Override
-    public void writePacketData(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(this.playingIndex);
         buf.writeVarInt(this.track);
     }
 
     @Override
-    public void processPacket(NetworkEvent.Context ctx) {
-        switch (ctx.getDirection().getReceptionSide()) {
-            case CLIENT -> EtchedClientPlayPacketHandler.handleSetAlbumJukeboxTrack(this, ctx);
-            case SERVER -> EtchedServerPlayPacketHandler.handleSetAlbumJukeboxTrack(this, ctx);
-        }
+    public PacketType<?> getType() {
+        return EtchedMessages.SET_ALBUM_JUKEBOX_TRACK;
     }
 }

@@ -4,9 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import gg.moonflower.etched.common.item.ComplexMusicLabelItem;
 import gg.moonflower.etched.common.item.MusicLabelItem;
 import gg.moonflower.etched.common.item.SimpleMusicLabelItem;
-import gg.moonflower.etched.common.network.EtchedMessages;
 import gg.moonflower.etched.common.network.play.ServerboundEditMusicLabelPacket;
 import gg.moonflower.etched.core.Etched;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -155,6 +155,6 @@ public class EditMusicLabelScreen extends Screen {
         SimpleMusicLabelItem.setAuthor(this.labelStack, author);
 
         int slot = this.hand == InteractionHand.MAIN_HAND ? this.player.getInventory().selected : 40;
-        EtchedMessages.PLAY.sendToServer(new ServerboundEditMusicLabelPacket(slot, author, title));
+        ClientPlayNetworking.send(new ServerboundEditMusicLabelPacket(slot, author, title));
     }
 }

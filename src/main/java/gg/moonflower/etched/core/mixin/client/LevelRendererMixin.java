@@ -9,7 +9,6 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,19 +31,19 @@ public abstract class LevelRendererMixin {
     @Shadow
     protected abstract void notifyNearbyEntities(Level level, BlockPos blockPos, boolean bl);
 
-    @Redirect(method = "playStreamingMusic(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/RecordItem;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setNowPlaying(Lnet/minecraft/network/chat/Component;)V"))
+    @Redirect(method = "playStreamingMusic", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setNowPlaying(Lnet/minecraft/network/chat/Component;)V"))
     public void redirectNowPlaying(Gui gui, Component component) {
         if (this.level.getBlockState(this.etched$pos.above()).isAir() && PlayableRecord.canShowMessage(this.etched$pos.getX() + 0.5, this.etched$pos.getY() + 0.5, this.etched$pos.getZ() + 0.5)) {
             gui.setNowPlaying(component);
         }
     }
 
-    @Inject(method = "playStreamingMusic(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/RecordItem;)V", at = @At("HEAD"), remap = false)
-    public void playRecord(SoundEvent soundEvent, BlockPos pos, RecordItem musicDiscItem, CallbackInfo ci) {
+    @Inject(method = "playStreamingMusic", at = @At("HEAD"), remap = false)
+    public void playRecord(SoundEvent soundEvent, BlockPos pos, CallbackInfo ci) {
         this.etched$pos = pos;
     }
 
-    @ModifyVariable(method = "playStreamingMusic(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/RecordItem;)V", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BEFORE), index = 4, remap = false)
+    @ModifyVariable(method = "playStreamingMusic", at = @At(value = "STORE"), remap = false)
     public SoundInstance modifySoundInstance(SoundInstance soundInstance) {
         return StopListeningSound.create(soundInstance, () -> this.notifyNearbyEntities(this.level, this.etched$pos, false));
     }

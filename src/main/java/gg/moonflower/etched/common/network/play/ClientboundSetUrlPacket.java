@@ -1,8 +1,9 @@
 package gg.moonflower.etched.common.network.play;
 
-import gg.moonflower.etched.common.network.play.handler.EtchedClientPlayPacketHandler;
+import gg.moonflower.etched.common.network.EtchedMessages;
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * @author Ocelot
  */
 @ApiStatus.Internal
-public record ClientboundSetUrlPacket(String url) implements EtchedPacket {
+public record ClientboundSetUrlPacket(String url) implements FabricPacket {
 
     public ClientboundSetUrlPacket(@Nullable String url) {
         this.url = url != null ? url : "";
@@ -22,12 +23,12 @@ public record ClientboundSetUrlPacket(String url) implements EtchedPacket {
     }
 
     @Override
-    public void writePacketData(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeUtf(this.url);
     }
 
     @Override
-    public void processPacket(NetworkEvent.Context ctx) {
-        EtchedClientPlayPacketHandler.handleSetUrl(this, ctx);
+    public PacketType<?> getType() {
+        return EtchedMessages.CLIENTBOUND_SET_URL;
     }
 }

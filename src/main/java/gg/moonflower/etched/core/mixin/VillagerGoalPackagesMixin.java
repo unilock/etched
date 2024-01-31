@@ -34,9 +34,9 @@ public class VillagerGoalPackagesMixin {
 
     @ModifyVariable(method = "getWorkPackage", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/behavior/VillagerGoalPackages;getMinimalLookBehavior()Lcom/mojang/datafixers/util/Pair;"))
     private static WorkAtPoi modifyWorkPoi(WorkAtPoi value) {
-        if (etched$capturedProfession == EtchedVillagers.BARD.get()) {
-            return new WorkAtNoteBlock();
-        }
+        //if (etched$capturedProfession == EtchedVillagers.BARD) {
+        //    return new WorkAtNoteBlock();
+        //}
         return value;
     }
 }

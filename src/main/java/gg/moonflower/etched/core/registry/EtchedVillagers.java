@@ -1,11 +1,12 @@
 package gg.moonflower.etched.core.registry;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.util.Pair;
 import gg.moonflower.etched.core.Etched;
 import gg.moonflower.etched.core.mixin.StructureTemplatePoolAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -30,44 +31,42 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(modid = Etched.MOD_ID)
 public class EtchedVillagers {
 
-    public static final DeferredRegister<PoiType> POI_REGISTRY = DeferredRegister.create(ForgeRegistries.POI_TYPES, Etched.MOD_ID);
-    public static final DeferredRegister<VillagerProfession> PROFESSION_REGISTRY = DeferredRegister.create(ForgeRegistries.VILLAGER_PROFESSIONS, Etched.MOD_ID);
+    public static final PoiType BARD_POI = Registry.register(BuiltInRegistries.POINT_OF_INTEREST_TYPE, new ResourceLocation(Etched.MOD_ID, "bard"), new PoiType(ImmutableSet.<BlockState>builder().addAll(Blocks.NOTE_BLOCK.getStateDefinition().getPossibleStates()).build(), 1, 1));
+    private static final ResourceKey<PoiType> BARD_POI_TYPE = ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, new ResourceLocation(Etched.MOD_ID, "bard"));
+    public static final VillagerProfession BARD = Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, new ResourceLocation(Etched.MOD_ID, "bard"), new VillagerProfession(Etched.MOD_ID + ":bard", poi -> poi.is(BARD_POI_TYPE), poi -> poi.is(BARD_POI_TYPE), ImmutableSet.of(), ImmutableSet.of(), null));
 
-    public static final RegistryObject<PoiType> BARD_POI = POI_REGISTRY.register("bard", () -> new PoiType(ImmutableSet.<BlockState>builder().addAll(Blocks.NOTE_BLOCK.getStateDefinition().getPossibleStates()).build(), 1, 1));
-    public static final RegistryObject<VillagerProfession> BARD = PROFESSION_REGISTRY.register("bard", () -> new VillagerProfession(Etched.MOD_ID + ":bard", poi -> poi.is(BARD_POI.getId()), poi -> poi.is(BARD_POI.getId()), ImmutableSet.of(), ImmutableSet.of(), null));
+    public static void init() {
+        registerTradesEvent();
+        serverStartingEvent();
+    }
 
-    @SubscribeEvent
-    public static void onEvent(net.minecraftforge.event.village.VillagerTradesEvent event) {
-        if (event.getType() != EtchedVillagers.BARD.get()) {
-            return;
-        }
+    public static void registerTradesEvent() {
+        final Int2ObjectMap<VillagerTrades.ItemListing[]> trades = VillagerTrades.TRADES.get(EtchedVillagers.BARD);
 
         Int2ObjectMap<TradeRegistry> newTrades = new Int2ObjectOpenHashMap<>();
-        int minTier = event.getTrades().keySet().intStream().min().orElse(1);
-        int maxTier = event.getTrades().keySet().intStream().max().orElse(5);
+        int minTier = trades.keySet().intStream().min().orElse(1);
+        int maxTier = trades.keySet().intStream().max().orElse(5);
         registerTrades(tier -> {
             Validate.inclusiveBetween(minTier, maxTier, tier, "Tier must be between " + minTier + " and " + maxTier);
             return newTrades.computeIfAbsent(tier, key -> new TradeRegistry());
         });
 
-        newTrades.forEach((tier, registry) -> event.getTrades().get(tier.intValue()).addAll(registry));
+        // TODO: ?
+        newTrades.forEach((tier, registry) -> TradeOfferHelper.registerVillagerOffers(EtchedVillagers.BARD, tier, list -> list.addAll(List.of(trades.get(tier.intValue())))));
     }
 
     private static void registerTrades(Function<Integer, TradeRegistry> context) {
@@ -104,23 +103,24 @@ public class EtchedVillagers {
         BuiltInRegistries.ITEM.getTag(ItemTags.MUSIC_DISCS).ifPresent(tag -> tag.stream().forEach(item -> tier5.add(item.value(), 10, 1, 4, 40, true)));
     }
 
-    @SubscribeEvent
-    public static void onEvent(ServerAboutToStartEvent event) {
-        RegistryAccess.Frozen access = event.getServer().registryAccess();
-        Optional<Registry<StructureTemplatePool>> templateRegistryOptional = access.registry(Registries.TEMPLATE_POOL);
-        Optional<Registry<StructureProcessorList>> processorListRegistyOptional = access.registry(Registries.PROCESSOR_LIST);
+    public static void serverStartingEvent() {
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            RegistryAccess.Frozen access = server.registryAccess();
+            Optional<Registry<StructureTemplatePool>> templateRegistryOptional = access.registry(Registries.TEMPLATE_POOL);
+            Optional<Registry<StructureProcessorList>> processorListRegistyOptional = access.registry(Registries.PROCESSOR_LIST);
 
-        if (templateRegistryOptional.isEmpty() || processorListRegistyOptional.isEmpty()) {
-            return;
-        }
+            if (templateRegistryOptional.isEmpty() || processorListRegistyOptional.isEmpty()) {
+                return;
+            }
 
-        Registry<StructureTemplatePool> templatePools = templateRegistryOptional.get();
-        Registry<StructureProcessorList> processorLists = processorListRegistyOptional.get();
-        createVillagePiece(templatePools, processorLists, "plains", "bard_house", 1, 2, ProcessorLists.MOSSIFY_10_PERCENT, ProcessorLists.ZOMBIE_PLAINS);
-        createVillagePiece(templatePools, processorLists, "desert", "bard_house", 1, 2, ProcessorLists.ZOMBIE_DESERT);
-        createVillagePiece(templatePools, processorLists, "savanna", "bard_house", 1, 4, ProcessorLists.ZOMBIE_SAVANNA);
-        createVillagePiece(templatePools, processorLists, "snowy", "bard_house", 1, 4, ProcessorLists.ZOMBIE_SNOWY);
-        createVillagePiece(templatePools, processorLists, "taiga", "bard_house", 1, 4, ProcessorLists.MOSSIFY_10_PERCENT, ProcessorLists.ZOMBIE_TAIGA);
+            Registry<StructureTemplatePool> templatePools = templateRegistryOptional.get();
+            Registry<StructureProcessorList> processorLists = processorListRegistyOptional.get();
+            createVillagePiece(templatePools, processorLists, "plains", "bard_house", 1, 2, ProcessorLists.MOSSIFY_10_PERCENT, ProcessorLists.ZOMBIE_PLAINS);
+            createVillagePiece(templatePools, processorLists, "desert", "bard_house", 1, 2, ProcessorLists.ZOMBIE_DESERT);
+            createVillagePiece(templatePools, processorLists, "savanna", "bard_house", 1, 4, ProcessorLists.ZOMBIE_SAVANNA);
+            createVillagePiece(templatePools, processorLists, "snowy", "bard_house", 1, 4, ProcessorLists.ZOMBIE_SNOWY);
+            createVillagePiece(templatePools, processorLists, "taiga", "bard_house", 1, 4, ProcessorLists.MOSSIFY_10_PERCENT, ProcessorLists.ZOMBIE_TAIGA);
+        });
     }
 
     private static void createVillagePiece(Registry<StructureTemplatePool> templatePools, Registry<StructureProcessorList> processorLists, String village, String name, int houseId, int weight, ResourceKey<StructureProcessorList> zombieProcessor) {

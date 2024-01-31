@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "etched",
+  "version": "${version}",
+  "name": "Etched",
+  "description": "A new form of entertainment.",
+  "authors": [
+    "Moonflower"
+  ],
+  "contributors": [
+    "Ocelot",
+    "Jackson",
+    "Farcr (Art)",
+    "AstraZoey (Sound Design)"
+  ],
+  "contact": {
+    "sources": "https://github.com/MoonflowerTeam/etched",
+    "issues": "https://github.com/MoonflowerTeam/etched/issues"
+  },
+  "license": "GPL-3.0",
+  "icon": "etched.icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "gg.moonflower.etched.core.Etched"
+    ],
+    "client": [
+      "gg.moonflower.etched.core.EtchedClient"
+    ]
+  },
+  "mixins": [
+    "etched.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": ">=1.20.1",
+    "fabric-api": "*",
+    "forgeconfigapiport": "*"
+  }
+}

@@ -23,7 +23,7 @@ public class BoomboxMenu extends AbstractContainerMenu {
     }
 
     public BoomboxMenu(int containerId, Inventory inventory, int index) {
-        super(EtchedMenus.BOOMBOX_MENU.get(), containerId);
+        super(EtchedMenus.BOOMBOX_MENU, containerId);
         this.boomboxInventory = index == -1 ? new SimpleContainer(1) : new BoomboxContainer(inventory, index);
 
         this.addSlot(new Slot(this.boomboxInventory, 0, 80, 20) {
@@ -43,7 +43,7 @@ public class BoomboxMenu extends AbstractContainerMenu {
                 this.addSlot(new Slot(inventory, x + y * 9 + 9, 8 + x * 18, y * 18 + 51) {
                     @Override
                     public boolean mayPickup(Player player) {
-                        return this.getItem().getItem() != EtchedItems.BOOMBOX.get();
+                        return this.getItem().getItem() != EtchedItems.BOOMBOX;
                     }
                 });
             }
@@ -53,7 +53,7 @@ public class BoomboxMenu extends AbstractContainerMenu {
             this.addSlot(new Slot(inventory, i, 8 + i * 18, 109) {
                 @Override
                 public boolean mayPickup(Player player) {
-                    return this.getItem().getItem() != EtchedItems.BOOMBOX.get();
+                    return this.getItem().getItem() != EtchedItems.BOOMBOX;
                 }
             });
         }

@@ -1,9 +1,9 @@
 package gg.moonflower.etched.client.screen;
 
 import gg.moonflower.etched.common.menu.RadioMenu;
-import gg.moonflower.etched.common.network.EtchedMessages;
 import gg.moonflower.etched.common.network.play.ServerboundSetUrlPacket;
 import gg.moonflower.etched.core.Etched;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -40,7 +40,7 @@ public class RadioScreen extends AbstractContainerScreen<RadioMenu> {
         this.url.setCanLoseFocus(false);
         this.addRenderableWidget(this.url);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
-            EtchedMessages.PLAY.sendToServer(new ServerboundSetUrlPacket(this.url.getValue()));
+            ClientPlayNetworking.send(new ServerboundSetUrlPacket(this.url.getValue()));
             this.minecraft.setScreen(null);
         }).bounds((this.width - this.imageWidth) / 2, (this.height - this.imageHeight) / 2 + this.imageHeight + 5, this.imageWidth, 20).build());
     }

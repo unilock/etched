@@ -6,9 +6,9 @@ import gg.moonflower.etched.api.record.TrackData;
 import gg.moonflower.etched.api.sound.SoundTracker;
 import gg.moonflower.etched.common.blockentity.AlbumJukeboxBlockEntity;
 import gg.moonflower.etched.common.menu.AlbumJukeboxMenu;
-import gg.moonflower.etched.common.network.EtchedMessages;
 import gg.moonflower.etched.common.network.play.SetAlbumJukeboxTrackPacket;
 import gg.moonflower.etched.core.Etched;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -61,7 +61,7 @@ public class AlbumJukeboxScreen extends AbstractContainerScreen<AlbumJukeboxMenu
 
         if (((albumJukebox.getPlayingIndex() == oldIndex && albumJukebox.getTrack() != oldTrack) || albumJukebox.recalculatePlayingIndex(!next)) && albumJukebox.getPlayingIndex() != -1) {
             SoundTracker.playAlbum(albumJukebox, albumJukebox.getBlockState(), level, this.menu.getPos(), true);
-            EtchedMessages.PLAY.sendToServer(new SetAlbumJukeboxTrackPacket(albumJukebox.getPlayingIndex(), albumJukebox.getTrack()));
+            ClientPlayNetworking.send(new SetAlbumJukeboxTrackPacket(albumJukebox.getPlayingIndex(), albumJukebox.getTrack()));
         }
     }
 

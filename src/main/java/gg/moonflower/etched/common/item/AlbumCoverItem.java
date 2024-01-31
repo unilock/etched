@@ -3,11 +3,9 @@ package gg.moonflower.etched.common.item;
 import gg.moonflower.etched.api.record.PlayableRecord;
 import gg.moonflower.etched.api.record.PlayableRecordItem;
 import gg.moonflower.etched.api.record.TrackData;
-import gg.moonflower.etched.client.render.item.AlbumCoverItemRenderer;
 import gg.moonflower.etched.common.menu.AlbumCoverMenu;
 import gg.moonflower.etched.core.Etched;
 import gg.moonflower.etched.core.registry.EtchedItems;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -29,11 +27,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem {
 
@@ -43,6 +39,7 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
         super(properties);
     }
 
+    /* TODO
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer) {
         consumer.accept(new IClientItemExtensions() {
@@ -52,6 +49,7 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
             }
         });
     }
+     */
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
@@ -185,7 +183,7 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
     }
 
     private static void add(ItemStack albumCover, ItemStack record) {
-        if (!albumCover.is(EtchedItems.ALBUM_COVER.get()) || !AlbumCoverMenu.isValid(record)) {
+        if (!albumCover.is(EtchedItems.ALBUM_COVER) || !AlbumCoverMenu.isValid(record)) {
             return;
         }
 
@@ -207,7 +205,7 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
     }
 
     private static boolean canAdd(ItemStack albumCover, ItemStack record) {
-        if (!albumCover.is(EtchedItems.ALBUM_COVER.get()) || !AlbumCoverMenu.isValid(record)) {
+        if (!albumCover.is(EtchedItems.ALBUM_COVER) || !AlbumCoverMenu.isValid(record)) {
             return false;
         }
         return albumCover.getTag() == null || !albumCover.getTag().contains("Records", Tag.TAG_LIST) || albumCover.getTag().getList("Records", Tag.TAG_COMPOUND).size() < MAX_RECORDS;
@@ -229,13 +227,15 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
         return getRecords(stack).stream().filter(record -> record.getItem() instanceof PlayableRecord).mapToInt(record -> ((PlayableRecord) record.getItem()).getTrackCount(record)).sum();
     }
 
+    /* TODO
     @Override
     public boolean canGrindstoneRepair(ItemStack stack) {
         return getCoverStack(stack).isPresent();
     }
+     */
 
     public static Optional<ItemStack> getCoverStack(ItemStack stack) {
-        if (stack.getItem() != EtchedItems.ALBUM_COVER.get()) {
+        if (stack.getItem() != EtchedItems.ALBUM_COVER) {
             return Optional.empty();
         }
 
@@ -249,7 +249,7 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
     }
 
     public static List<ItemStack> getRecords(ItemStack stack) {
-        if (stack.getItem() != EtchedItems.ALBUM_COVER.get()) {
+        if (stack.getItem() != EtchedItems.ALBUM_COVER) {
             return Collections.emptyList();
         }
 
@@ -275,7 +275,7 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
     }
 
     public static void setCover(ItemStack stack, ItemStack record) {
-        if (stack.getItem() != EtchedItems.ALBUM_COVER.get()) {
+        if (stack.getItem() != EtchedItems.ALBUM_COVER) {
             return;
         }
 
@@ -287,7 +287,7 @@ public class AlbumCoverItem extends PlayableRecordItem implements ContainerItem 
     }
 
     public static void setRecords(ItemStack stack, Collection<ItemStack> records) {
-        if (stack.getItem() != EtchedItems.ALBUM_COVER.get() || records.isEmpty()) {
+        if (stack.getItem() != EtchedItems.ALBUM_COVER || records.isEmpty()) {
             return;
         }
 

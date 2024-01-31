@@ -1,8 +1,9 @@
 package gg.moonflower.etched.common.network.play;
 
-import gg.moonflower.etched.common.network.play.handler.EtchedClientPlayPacketHandler;
+import gg.moonflower.etched.common.network.EtchedMessages;
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -10,19 +11,19 @@ import org.jetbrains.annotations.ApiStatus;
  * @author Jackson
  */
 @ApiStatus.Internal
-public record ClientboundInvalidEtchUrlPacket(String exception) implements EtchedPacket {
+public record ClientboundInvalidEtchUrlPacket(String exception) implements FabricPacket {
 
     public ClientboundInvalidEtchUrlPacket(FriendlyByteBuf buf) {
         this(buf.readUtf());
     }
 
     @Override
-    public void writePacketData(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeUtf(this.exception);
     }
 
     @Override
-    public void processPacket(NetworkEvent.Context ctx) {
-        EtchedClientPlayPacketHandler.handleSetInvalidEtch(this, ctx);
+    public PacketType<?> getType() {
+        return EtchedMessages.CLIENTBOUND_INVALID_ETCH_URL;
     }
 }

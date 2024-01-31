@@ -7,10 +7,10 @@ import gg.moonflower.etched.common.item.ComplexMusicLabelItem;
 import gg.moonflower.etched.common.item.EtchedMusicDiscItem;
 import gg.moonflower.etched.common.item.MusicLabelItem;
 import gg.moonflower.etched.common.menu.EtchingMenu;
-import gg.moonflower.etched.common.network.EtchedMessages;
 import gg.moonflower.etched.common.network.play.ServerboundSetUrlPacket;
 import gg.moonflower.etched.core.Etched;
 import gg.moonflower.etched.core.registry.EtchedItems;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -71,7 +71,7 @@ public class EtchingScreen extends AbstractContainerScreen<EtchingMenu> implemen
         this.url.setMaxLength(32500);
         this.url.setResponder(s -> {
             if (!Objects.equals(this.oldUrl, s) && this.urlTicks <= 0) {
-                EtchedMessages.PLAY.sendToServer(new ServerboundSetUrlPacket(""));
+                ClientPlayNetworking.send(new ServerboundSetUrlPacket(""));
             }
             this.urlTicks = 8;
         });
@@ -87,7 +87,7 @@ public class EtchingScreen extends AbstractContainerScreen<EtchingMenu> implemen
             this.urlTicks--;
             if (this.urlTicks <= 0 && !Objects.equals(this.oldUrl, this.url.getValue())) {
                 this.oldUrl = this.url.getValue();
-                EtchedMessages.PLAY.sendToServer(new ServerboundSetUrlPacket(this.url.getValue()));
+                ClientPlayNetworking.send(new ServerboundSetUrlPacket(this.url.getValue()));
             }
         }
     }
@@ -106,7 +106,7 @@ public class EtchingScreen extends AbstractContainerScreen<EtchingMenu> implemen
             this.labelStack = stack;
         }
 
-        boolean editable = this.discStack.getItem() == EtchedItems.ETCHED_MUSIC_DISC.get() || (!this.discStack.isEmpty() && !this.labelStack.isEmpty());
+        boolean editable = this.discStack.getItem() == EtchedItems.ETCHED_MUSIC_DISC || (!this.discStack.isEmpty() && !this.labelStack.isEmpty());
         this.url.setEditable(editable);
         this.url.setVisible(editable);
         this.url.setFocused(editable);
@@ -130,7 +130,7 @@ public class EtchingScreen extends AbstractContainerScreen<EtchingMenu> implemen
     protected void renderTooltip(GuiGraphics guiGraphics, int x, int y) {
         super.renderTooltip(guiGraphics, x, y);
 
-        boolean isEtched = this.discStack.getItem() == EtchedItems.ETCHED_MUSIC_DISC.get();
+        boolean isEtched = this.discStack.getItem() == EtchedItems.ETCHED_MUSIC_DISC;
         List<FormattedCharSequence> reasonLines = new ArrayList<>();
         if (!isEtched && !this.discStack.isEmpty() && this.labelStack.isEmpty()) {
             reasonLines.add(CANNOT_CREATE.getVisualOrderText());
@@ -155,11 +155,11 @@ public class EtchingScreen extends AbstractContainerScreen<EtchingMenu> implemen
         this.renderBackground(guiGraphics);
 
         guiGraphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        if ((!this.url.getValue().isEmpty() && !TrackData.isValidURL(this.url.getValue())) || !this.invalidReason.isEmpty() || (this.discStack.getItem() != EtchedItems.ETCHED_MUSIC_DISC.get() && ((!this.discStack.isEmpty() && this.labelStack.isEmpty()) || (this.discStack.isEmpty() && !this.labelStack.isEmpty())))) {
+        if ((!this.url.getValue().isEmpty() && !TrackData.isValidURL(this.url.getValue())) || !this.invalidReason.isEmpty() || (this.discStack.getItem() != EtchedItems.ETCHED_MUSIC_DISC && ((!this.discStack.isEmpty() && this.labelStack.isEmpty()) || (this.discStack.isEmpty() && !this.labelStack.isEmpty())))) {
             guiGraphics.blit(TEXTURE, this.leftPos + 83, this.topPos + 44, 0, 226, 27, 17);
         }
 
-        guiGraphics.blit(TEXTURE, this.leftPos + 9, this.topPos + 21, 0, (this.discStack.getItem() == EtchedItems.ETCHED_MUSIC_DISC.get() || (!this.discStack.isEmpty() && !this.labelStack.isEmpty()) ? 180 : 196), 158, 16);
+        guiGraphics.blit(TEXTURE, this.leftPos + 9, this.topPos + 21, 0, (this.discStack.getItem() == EtchedItems.ETCHED_MUSIC_DISC || (!this.discStack.isEmpty() && !this.labelStack.isEmpty()) ? 180 : 196), 158, 16);
 
         if (this.displayLabels) {
             for (int index = 0; index < 6; index++) {

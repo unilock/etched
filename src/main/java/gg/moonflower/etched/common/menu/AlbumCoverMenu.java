@@ -26,7 +26,7 @@ public class AlbumCoverMenu extends AbstractContainerMenu {
     }
 
     public AlbumCoverMenu(int containerId, Inventory inventory, int albumCoverIndex) {
-        super(EtchedMenus.ALBUM_COVER_MENU.get(), containerId);
+        super(EtchedMenus.ALBUM_COVER_MENU, containerId);
         this.albumCoverInventory = albumCoverIndex == -1 ? new SimpleContainer(AlbumCoverItem.MAX_RECORDS) : new AlbumCoverContainer(inventory, albumCoverIndex);
         this.albumCoverIndex = albumCoverIndex;
         this.inventory = inventory;
@@ -47,7 +47,7 @@ public class AlbumCoverMenu extends AbstractContainerMenu {
                 this.addSlot(new Slot(inventory, x + y * 9 + 9, 8 + x * 18, y * 18 + 84) {
                     @Override
                     public boolean mayPickup(Player player) {
-                        return this.getItem().getItem() != EtchedItems.ALBUM_COVER.get();
+                        return this.getItem().getItem() != EtchedItems.ALBUM_COVER;
                     }
                 });
             }
@@ -57,7 +57,7 @@ public class AlbumCoverMenu extends AbstractContainerMenu {
             this.addSlot(new Slot(inventory, i, 8 + i * 18, 142) {
                 @Override
                 public boolean mayPickup(Player player) {
-                    return this.getItem().getItem() != EtchedItems.ALBUM_COVER.get();
+                    return this.getItem().getItem() != EtchedItems.ALBUM_COVER;
                 }
             });
         }
@@ -113,6 +113,6 @@ public class AlbumCoverMenu extends AbstractContainerMenu {
     }
 
     public static boolean isValid(ItemStack stack) {
-        return PlayableRecord.isPlayableRecord(stack) && !stack.is(EtchedItems.ALBUM_COVER.get());
+        return PlayableRecord.isPlayableRecord(stack) && !stack.is(EtchedItems.ALBUM_COVER);
     }
 }

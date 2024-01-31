@@ -2,11 +2,11 @@ package gg.moonflower.etched.common.block;
 
 import gg.moonflower.etched.common.blockentity.RadioBlockEntity;
 import gg.moonflower.etched.common.menu.RadioMenu;
-import gg.moonflower.etched.common.network.EtchedMessages;
 import gg.moonflower.etched.common.network.play.ClientboundSetUrlPacket;
 import gg.moonflower.etched.core.Etched;
 import gg.moonflower.etched.core.mixin.client.LevelRendererAccessor;
 import gg.moonflower.etched.core.registry.EtchedBlocks;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -36,8 +36,6 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.PacketDistributor;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -71,7 +69,7 @@ public class RadioBlock extends BaseEntityBlock {
         }
         player.openMenu(state.getMenuProvider(level, pos)).ifPresent(__ -> {
             String url = level.getBlockEntity(pos) instanceof RadioBlockEntity be ? be.getUrl() : "";
-            EtchedMessages.PLAY.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ClientboundSetUrlPacket(url));
+            ServerPlayNetworking.send((ServerPlayer) player, new ClientboundSetUrlPacket(url));
         });
         return InteractionResult.CONSUME;
     }
@@ -165,7 +163,7 @@ public class RadioBlock extends BaseEntityBlock {
 
     @Override
     public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
-        return new ItemStack(state.getValue(PORTAL) ? EtchedBlocks.PORTAL_RADIO_ITEM.get() : EtchedBlocks.RADIO.get());
+        return new ItemStack(state.getValue(PORTAL) ? EtchedBlocks.PORTAL_RADIO_ITEM : EtchedBlocks.RADIO);
     }
 
     @Override
@@ -192,6 +190,6 @@ public class RadioBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        return createTickerHelper(blockEntityType, EtchedBlocks.RADIO_BE.get(), RadioBlockEntity::tick);
+        return createTickerHelper(blockEntityType, EtchedBlocks.RADIO_BE, RadioBlockEntity::tick);
     }
 }

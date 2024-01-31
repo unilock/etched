@@ -16,7 +16,6 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -30,14 +29,14 @@ public class EtchedClientPlayPacketHandler {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void handlePlayMusicPacket(ClientboundPlayMusicPacket pkt, NetworkEvent.Context ctx) {
+    public static void handlePlayMusicPacket(ClientboundPlayMusicPacket pkt) {
         Minecraft client = Minecraft.getInstance();
         ClientLevel level = client.level;
         if (level == null) {
             return;
         }
 
-        ctx.enqueueWork(() -> {
+        Minecraft.getInstance().execute(() -> {
             BlockPos pos = pkt.pos();
             Map<BlockPos, SoundInstance> playingRecords = ((LevelRendererAccessor) client.levelRenderer).getPlayingRecords();
             SoundInstance soundInstance = playingRecords.get(pos);
@@ -56,14 +55,14 @@ public class EtchedClientPlayPacketHandler {
         });
     }
 
-    public static void handlePlayEntityMusicPacket(ClientboundPlayEntityMusicPacket pkt, NetworkEvent.Context ctx) {
+    public static void handlePlayEntityMusicPacket(ClientboundPlayEntityMusicPacket pkt) {
         Minecraft client = Minecraft.getInstance();
         ClientLevel level = client.level;
         if (level == null) {
             return;
         }
 
-        ctx.enqueueWork(() -> {
+        Minecraft.getInstance().execute(() -> {
             int entityId = pkt.getEntityId();
             SoundInstance soundInstance = SoundTracker.getEntitySound(entityId);
             if (soundInstance != null) {
@@ -107,24 +106,24 @@ public class EtchedClientPlayPacketHandler {
         });
     }
 
-    public static void handleSetInvalidEtch(ClientboundInvalidEtchUrlPacket pkt, NetworkEvent.Context ctx) {
-        ctx.enqueueWork(() -> {
+    public static void handleSetInvalidEtch(ClientboundInvalidEtchUrlPacket pkt) {
+        Minecraft.getInstance().execute(() -> {
             if (Minecraft.getInstance().screen instanceof EtchingScreen screen) {
                 screen.setReason(pkt.exception());
             }
         });
     }
 
-    public static void handleSetUrl(ClientboundSetUrlPacket pkt, NetworkEvent.Context ctx) {
-        ctx.enqueueWork(() -> {
+    public static void handleSetUrl(ClientboundSetUrlPacket pkt) {
+        Minecraft.getInstance().execute(() -> {
             if (Minecraft.getInstance().screen instanceof RadioScreen screen) {
                 screen.receiveUrl(pkt.url());
             }
         });
     }
 
-    public static void handleSetAlbumJukeboxTrack(SetAlbumJukeboxTrackPacket pkt, NetworkEvent.Context ctx) {
-        ctx.enqueueWork(() -> {
+    public static void handleSetAlbumJukeboxTrack(SetAlbumJukeboxTrackPacket pkt) {
+        Minecraft.getInstance().execute(() -> {
             Minecraft client = Minecraft.getInstance();
             if (client.level != null && client.screen instanceof AlbumJukeboxScreen screen) {
                 BlockPos pos = screen.getMenu().getPos();

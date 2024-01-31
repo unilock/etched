@@ -70,7 +70,7 @@ public class ComplexMusicLabelRecipe extends CustomRecipe {
 
     @Override
     public ItemStack getResultItem(RegistryAccess registryAccess) {
-        return new ItemStack(EtchedItems.COMPLEX_MUSIC_LABEL.get());
+        return new ItemStack(EtchedItems.COMPLEX_MUSIC_LABEL);
     }
 
     @Override
@@ -80,6 +80,6 @@ public class ComplexMusicLabelRecipe extends CustomRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return EtchedRecipes.COMPLEX_MUSIC_LABEL.get();
+        return EtchedRecipes.COMPLEX_MUSIC_LABEL;
     }
 }

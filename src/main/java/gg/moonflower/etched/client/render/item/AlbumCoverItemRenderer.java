@@ -8,6 +8,9 @@ import gg.moonflower.etched.api.record.AlbumCover;
 import gg.moonflower.etched.api.record.PlayableRecord;
 import gg.moonflower.etched.common.item.AlbumCoverItem;
 import gg.moonflower.etched.core.Etched;
+import gg.moonflower.etched.core.mixin.client.SpriteContentsAccessor;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -35,8 +38,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.common.MinecraftForge;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -49,7 +50,7 @@ import java.util.concurrent.Executor;
 /**
  * @author Ocelot
  */
-public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer implements PreparableReloadListener {
+public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer implements IdentifiableResourceReloadListener {
 
     public static final AlbumCoverItemRenderer INSTANCE = new AlbumCoverItemRenderer();
     public static final String FOLDER_NAME = Etched.MOD_ID + "_album_cover";
@@ -65,7 +66,7 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
     private CoverData data;
 
     static {
-        MinecraftForge.EVENT_BUS.<ClientPlayerNetworkEvent.LoggingOut>addListener(event -> INSTANCE.close());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> INSTANCE.close());
     }
 
     private AlbumCoverItemRenderer() {
@@ -89,11 +90,11 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
 
         for (Direction direction : Direction.values()) {
             randomsource.setSeed(42L);
-            renderQuadList(matrixStack, buffer, model.getQuads(null, direction, randomsource, net.minecraftforge.client.model.data.ModelData.EMPTY, renderType), combinedLight, combinedOverlay);
+            renderQuadList(matrixStack, buffer, model.getQuads(null, direction, randomsource), combinedLight, combinedOverlay);
         }
 
         randomsource.setSeed(42L);
-        renderQuadList(matrixStack, buffer, model.getQuads(null, null, randomsource, net.minecraftforge.client.model.data.ModelData.EMPTY, renderType), combinedLight, combinedOverlay);
+        renderQuadList(matrixStack, buffer, model.getQuads(null, null, randomsource), combinedLight, combinedOverlay);
     }
 
     private static void renderQuadList(PoseStack matrixStack, VertexConsumer buffer, List<BakedQuad> quads, int combinedLight, int combinedOverlay) {
@@ -171,6 +172,11 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
         poseStack.popPose();
     }
 
+    @Override
+    public ResourceLocation getFabricId() {
+        return new ResourceLocation(Etched.MOD_ID, "album_cover");
+    }
+
     public static class CoverData {
 
         private final DynamicModelData overlay;
@@ -223,7 +229,7 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
         private BakedModel model;
 
         private DynamicModelData(NativeImage image) {
-            super(ATLAS, new SpriteContents(new ResourceLocation(Etched.MOD_ID, DigestUtils.md5Hex(UUID.randomUUID().toString())), new FrameSize(image.getWidth(), image.getHeight()), image, AnimationMetadataSection.EMPTY, null), image.getWidth(), image.getHeight(), 0, 0);
+            super(ATLAS, new SpriteContents(new ResourceLocation(Etched.MOD_ID, DigestUtils.md5Hex(UUID.randomUUID().toString())), new FrameSize(image.getWidth(), image.getHeight()), image, AnimationMetadataSection.EMPTY), image.getWidth(), image.getHeight(), 0, 0);
         }
 
         @Override
@@ -232,7 +238,8 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
             if (model.isCustomRenderer()) {
                 return;
             }
-            model.applyTransform(transformType, matrixStack, transformType == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || transformType == ItemDisplayContext.THIRD_PERSON_LEFT_HAND);
+            // TODO?
+            model.getTransforms().getTransform(transformType).apply(transformType == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || transformType == ItemDisplayContext.THIRD_PERSON_LEFT_HAND, matrixStack);
             matrixStack.translate(-0.5D, -0.5D, -0.5D);
             RenderType renderType = RenderType.entityCutout(this.contents().name());
             renderModelLists(model, packedLight, combinedOverlay, matrixStack, ItemRenderer.getFoilBufferDirect(buffer, renderType, false, stack.hasFoil()), renderType);
@@ -255,7 +262,7 @@ public class AlbumCoverItemRenderer extends BlockEntityWithoutLevelRenderer impl
         }
 
         public NativeImage getImage() {
-            return this.contents().getOriginalImage();
+            return ((SpriteContentsAccessor) this.contents()).getOriginalImage();
         }
 
         @Override

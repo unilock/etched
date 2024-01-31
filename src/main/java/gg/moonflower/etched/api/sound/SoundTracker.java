@@ -12,6 +12,7 @@ import gg.moonflower.etched.core.mixin.client.GuiAccessor;
 import gg.moonflower.etched.core.mixin.client.LevelRendererAccessor;
 import gg.moonflower.etched.core.registry.EtchedTags;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -34,8 +35,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -54,7 +53,7 @@ public class SoundTracker {
     private static final Component RADIO = Component.translatable("sound_source." + Etched.MOD_ID + ".radio");
 
     static {
-        MinecraftForge.EVENT_BUS.<ClientPlayerNetworkEvent.LoggingOut>addListener(event -> FAILED_URLS.clear());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> FAILED_URLS.clear());
 //        ClientPlayerNetworkEvent.LoggingOut.DISCONNECT.register((multiPlayerGameMode, localPlayer, connection) -> FAILED_URLS.clear());
     }
 

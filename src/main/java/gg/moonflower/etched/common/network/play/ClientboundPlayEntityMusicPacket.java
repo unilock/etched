@@ -1,17 +1,18 @@
 package gg.moonflower.etched.common.network.play;
 
-import gg.moonflower.etched.common.network.play.handler.EtchedClientPlayPacketHandler;
+import gg.moonflower.etched.common.network.EtchedMessages;
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
  * @author Ocelot
  */
 @ApiStatus.Internal
-public class ClientboundPlayEntityMusicPacket implements EtchedPacket {
+public class ClientboundPlayEntityMusicPacket implements FabricPacket {
 
     private final Action action;
     private final ItemStack record;
@@ -36,7 +37,7 @@ public class ClientboundPlayEntityMusicPacket implements EtchedPacket {
     }
 
     @Override
-    public void writePacketData(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeEnum(this.action);
         if (this.action != Action.STOP) {
             buf.writeItem(this.record);
@@ -45,8 +46,8 @@ public class ClientboundPlayEntityMusicPacket implements EtchedPacket {
     }
 
     @Override
-    public void processPacket(NetworkEvent.Context ctx) {
-        EtchedClientPlayPacketHandler.handlePlayEntityMusicPacket(this, ctx);
+    public PacketType<?> getType() {
+        return EtchedMessages.CLIENTBOUND_PLAY_ENTITY_MUSIC;
     }
 
     /**

@@ -6,15 +6,16 @@
   "client": [
     "client.ChannelMixin",
     "client.ClientLivingEntityMixin",
-    "client.ForgeIngameGuiMixin",
     "client.GuiAccessor",
+    "client.GuiMixin",
     "client.HumanoidModelMixin",
     "client.ItemRendererMixin",
     "client.ItemStackMixin",
     "client.LevelRendererAccessor",
     "client.LevelRendererMixin",
     "client.ParrotMixin",
-    "client.SoundEngineMixin"
+    "client.SoundEngineMixin",
+    "client.SpriteContentsAccessor"
   ],
   "mixins": [
     "JukeboxBlockEntityMixin",

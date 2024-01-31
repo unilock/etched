@@ -2,6 +2,8 @@ package gg.moonflower.etched.common.item;
 
 import gg.moonflower.etched.client.screen.EditMusicLabelScreen;
 import gg.moonflower.etched.core.Etched;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -15,8 +17,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public class SimpleMusicLabelItem extends Item {
         tag.putString("Title", title);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void openMusicLabelEditScreen(Player player, InteractionHand hand, ItemStack stack) {
         Minecraft.getInstance().setScreen(new EditMusicLabelScreen(player, hand, stack));
     }

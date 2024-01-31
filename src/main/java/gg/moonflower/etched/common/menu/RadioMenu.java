@@ -25,7 +25,7 @@ public class RadioMenu extends AbstractContainerMenu {
     }
 
     public RadioMenu(int id, Inventory inventory, ContainerLevelAccess access, Consumer<String> containerLevelAccess) {
-        super(EtchedMenus.RADIO_MENU.get(), id);
+        super(EtchedMenus.RADIO_MENU, id);
         this.access = access;
         this.urlConsumer = containerLevelAccess;
     }
@@ -37,7 +37,7 @@ public class RadioMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(this.access, player, EtchedBlocks.RADIO.get());
+        return stillValid(this.access, player, EtchedBlocks.RADIO);
     }
 
     /**

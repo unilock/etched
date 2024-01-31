@@ -78,6 +78,7 @@ public class BoomboxItem extends Item implements ContainerItem {
         }
     }
 
+    /* TODO
     @Override
     public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
         if (!entity.level().isClientSide()) {
@@ -86,6 +87,7 @@ public class BoomboxItem extends Item implements ContainerItem {
         updatePlaying(entity, hasRecord(stack) && !isPaused(stack) ? getRecord(stack) : ItemStack.EMPTY);
         return false;
     }
+     */
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
@@ -261,7 +263,7 @@ public class BoomboxItem extends Item implements ContainerItem {
     }
 
     private static boolean canAdd(ItemStack boombox, ItemStack record) {
-        if (!(boombox.is(EtchedItems.BOOMBOX.get())) || !(record.getItem() instanceof PlayableRecord)) {
+        if (!(boombox.is(EtchedItems.BOOMBOX)) || !(record.getItem() instanceof PlayableRecord)) {
             return false;
         }
         return getRecord(boombox).isEmpty();
