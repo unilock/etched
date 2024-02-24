@@ -43,7 +43,7 @@ public abstract class LevelRendererMixin {
         this.etched$pos = pos;
     }
 
-    @ModifyVariable(method = "playStreamingMusic", at = @At(value = "STORE"), remap = false)
+    @ModifyVariable(method = "playStreamingMusic", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BEFORE), index = 3, remap = false)
     public SoundInstance modifySoundInstance(SoundInstance soundInstance) {
         return StopListeningSound.create(soundInstance, () -> this.notifyNearbyEntities(this.level, this.etched$pos, false));
     }
